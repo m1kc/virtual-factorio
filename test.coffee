@@ -66,14 +66,20 @@ exports['basic arithmetics'] = ->
 
 exports['basic decision making'] = ->
 	f = new Factorio()
-	f.constant 'C1', { source: 42 }, ['D1', 'D2', 'D3']
+	f.constant 'C1', { source: 42 }, ['D1', 'D2', 'D3', 'D4', 'D5', 'D6']
 	f.decider 'D1', ['source', '<', 43, 'barrel', 1]
 	f.decider 'D2', ['source', '=', 42, 'barrel', 1]
 	f.decider 'D3', ['source', '>', 41, 'barrel', 1]
+	f.decider 'D4', ['source', '<', 41, 'barrel', 1]
+	f.decider 'D5', ['source', '=', 43, 'barrel', 1]
+	f.decider 'D6', ['source', '>', 43, 'barrel', 1]
 	f.tick(1)
 	test.object(f.devices.D1.output).is { barrel: 1 }
 	test.object(f.devices.D2.output).is { barrel: 1 }
 	test.object(f.devices.D3.output).is { barrel: 1 }
+	test.object(f.devices.D4.output).is {}
+	test.object(f.devices.D5.output).is {}
+	test.object(f.devices.D6.output).is {}
 	return
 
 
@@ -101,4 +107,40 @@ exports['fast endless counter'] = ->
 	test.object(f.devices.counter.output).is { barrel: 2 }
 	f.tick(1)
 	test.object(f.devices.counter.output).is { barrel: 3 }
+	return
+
+
+exports['"anything" conditions'] = ->
+	f = new Factorio()
+	f.constant 'C1', { source: 42, quest: 5 }, ['D1', 'D2', 'D3', 'D4']
+	f.decider 'D1', ['anything', '>', 0,  'light', 1]
+	f.decider 'D2', ['anything', '>', 10, 'light', 1]
+	f.decider 'D3', ['anything', '>', 43, 'light', 1]
+	f.decider 'D4', ['anything', '<', 6,  'light', 1]
+	f.tick(1)
+	test.object(f.devices.D1.output).is { light: 1 }
+	test.object(f.devices.D2.output).is { light: 1 }
+	test.object(f.devices.D3.output).is {}
+	test.object(f.devices.D4.output).is { light: 1 }
+	return
+
+
+exports['rule validation'] = ->
+	test.error ->
+		f = new Factorio()
+		f.constant 'too-big', {
+			'S01': 1, 'S02': 1, 'S03': 1, 'S04': 1, 'S05': 1,
+			'S06': 1, 'S07': 1, 'S08': 1, 'S09': 1, 'S10': 1,
+			'S11': 1, 'S12': 1, 'S13': 1, 'S14': 1, 'S15': 1,
+			'S16': 1
+		}
+	test.error ->
+		f = new Factorio()
+		f.arith 'first-arg-is-not-string', [2, '*', 2, 'barrel']
+	test.error ->
+		f = new Factorio()
+		f.arith 'some-weird-rule', ['barrel', '#', 2, 'barrel']
+	test.error ->
+		f = new Factorio()
+		f.arith 'some-weird-rule', ['barrel', '+', {}, 'barrel']
 	return

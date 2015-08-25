@@ -54,6 +54,14 @@ class Factorio
 	arith: (id, rules, outs) ->
 		this.checkId(id)
 		rules = rules or []
+		if typeof(rules[0]) != 'string'
+			throw new Error '1st argument must be a string'
+		if not (rules[1] in ['+', '-', '*', '/'])
+			throw new Error "Unknown operation: #{rules[1]}"
+		if not (typeof(rules[2]) in ['string', 'number'])
+			throw new Error "String or number expected, #{typeof rules[2]} found"
+		if typeof(rules[3]) != 'string'
+			throw new Error '4th argument must be a string'
 		outs = outs or []
 		if typeof(outs) is 'string'
 			outs = [outs]
@@ -88,12 +96,15 @@ class Factorio
 	tick: (n) ->
 		n = n or 1
 		for i in [1..n]
+			# clear inputs
 			for id, device of this.devices
 				device.input = {}
+			# apply outputs
 			for id, device of this.devices
 				for out in device.outs
 					this.applySignal(device.output, out)
 				device.output = {}
+			# apply logic
 			for id, device of this.devices
 				if device.type is 'constant'
 					device.output = device.cdata
@@ -112,16 +123,32 @@ class Factorio
 				else if device.type is 'decider'
 					tmp = device.rules.slice()
 					if typeof tmp[0] is 'string'
-						tmp[0] = device.input[tmp[0]] or 0
+						if tmp[0] != 'anything'
+							tmp[0] = device.input[tmp[0]] or 0
 					if typeof tmp[2] is 'string'
 						tmp[2] = device.input[tmp[2]] or 0
-					success = false
-					success = switch tmp[1]
-						when '<' then tmp[0] < tmp[2]
-						when '>' then tmp[0] > tmp[2]
-						when '=' then tmp[0] == tmp[2]
-						else throw new Error "Unknown operation: #{tmp[1]}"
-					device.output[tmp[3]] = 1
+					if tmp[0] is 'anything'
+						globalSuccess = false
+						for key, value of device.input
+							localSuccess = false
+							localSuccess = switch tmp[1]
+								when '<' then value < tmp[2]
+								when '>' then value > tmp[2]
+								when '=' then value == tmp[2]
+								else throw new Error "Unknown operation: #{tmp[1]}"
+							if localSuccess
+								globalSuccess = true
+						if globalSuccess
+							device.output[tmp[3]] = 1
+					else
+						success = false
+						success = switch tmp[1]
+							when '<' then tmp[0] < tmp[2]
+							when '>' then tmp[0] > tmp[2]
+							when '=' then tmp[0] == tmp[2]
+							else throw new Error "Unknown operation: #{tmp[1]}"
+						if success
+							device.output[tmp[3]] = 1
 				else
 					throw new Error "Unknown type '#{device.type}' of device #{id}"
 
