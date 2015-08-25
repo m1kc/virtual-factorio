@@ -121,15 +121,31 @@ class Factorio
 				else if device.type is 'arith'
 					tmp = device.rules.slice()
 					if typeof tmp[0] is 'string'
-						tmp[0] = device.input[tmp[0]] or 0
+						if tmp[0] != 'each'
+							tmp[0] = device.input[tmp[0]] or 0
 					if typeof tmp[2] is 'string'
 						tmp[2] = device.input[tmp[2]] or 0
-					device.output[tmp[3]] = switch tmp[1]
-						when '+' then tmp[0]+tmp[2]
-						when '-' then tmp[0]-tmp[2]
-						when '*' then tmp[0]*tmp[2]
-						when '/' then Math.floor(tmp[0]/tmp[2])
-						else throw new Error "Unknown operation: #{tmp[1]}"
+					if tmp[0] is 'each'
+						preResult = {}
+						for key, value of device.input
+							preResult[key] = switch tmp[1]
+								when '+' then value+tmp[2]
+								when '-' then value-tmp[2]
+								when '*' then value*tmp[2]
+								when '/' then Math.floor(value/tmp[2])
+						if tmp[3] is 'each'
+							device.output = preResult
+						else
+							sum = 0
+							for key, value of preResult
+								sum += value
+							device.output[tmp[3]] = sum
+					else
+						device.output[tmp[3]] = switch tmp[1]
+							when '+' then tmp[0]+tmp[2]
+							when '-' then tmp[0]-tmp[2]
+							when '*' then tmp[0]*tmp[2]
+							when '/' then Math.floor(tmp[0]/tmp[2])
 				else if device.type is 'decider'
 					tmp = device.rules.slice()
 					if typeof tmp[0] is 'string'

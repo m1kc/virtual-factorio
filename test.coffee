@@ -182,3 +182,14 @@ exports['RS trigger'] = ->
 	f.tick(1)
 	test.object(f.devices.RS.output).is {}
 	return
+
+
+exports['Mass arithmetics'] = ->
+	f = new Factorio()
+	f.constant 'C1', { a: 1, b: 2, c: 3 }, ['A1', 'A2']
+	f.arith 'A1', ['each', '*', 3, 'each']
+	f.arith 'A2', ['each', '*', 3, 'barrel']
+	f.tick(1)
+	test.object(f.devices.A1.output).is { a: 3, b: 6, c: 9 }
+	test.object(f.devices.A2.output).is { barrel: 18 }
+	return
