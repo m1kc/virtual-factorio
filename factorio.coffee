@@ -79,6 +79,16 @@ class Factorio
 	decider: (id, rules, outs) ->
 		this.checkId(id)
 		rules = rules or []
+		if typeof(rules[0]) != 'string'
+			throw new Error '1st argument must be a string'
+		if not (rules[1] in ['>', '<', '='])
+			throw new Error "Unknown condition: #{rules[1]}"
+		if not (typeof(rules[2]) in ['string', 'number'])
+			throw new Error "String or number expected, #{typeof rules[2]} found"
+		if typeof(rules[3]) != 'string'
+			throw new Error '4th argument must be a string'
+		if not (rules[4] in [1, 'keep'])
+			throw new Error '5th argument must be 1 or "keep"'
 		outs = outs or []
 		if typeof(outs) is 'string'
 			outs = [outs]

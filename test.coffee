@@ -143,4 +143,42 @@ exports['rule validation'] = ->
 	test.error ->
 		f = new Factorio()
 		f.arith 'some-weird-rule', ['barrel', '+', {}, 'barrel']
+	test.error ->
+		f = new Factorio()
+		f.decider 'some-weird-rule', [2, '>', 2, 'barrel', 1]
+	test.error ->
+		f = new Factorio()
+		f.decider 'some-weird-rule', ['barrel', '!=', 2, 'barrel', 1]
+	test.error ->
+		f = new Factorio()
+		f.decider 'some-weird-rule', ['barrel', '>', {}, 'barrel', 1]
+	test.error ->
+		f = new Factorio()
+		f.decider 'some-weird-rule', ['barrel', '>', 2, {}, 1]
+	test.error ->
+		f = new Factorio()
+		f.decider 'some-weird-rule', ['barrel', '>', 2, 'barrel', 3]
+	return
+
+
+exports['RS trigger'] = ->
+	f = new Factorio()
+	# S -> T1 -------------> RS
+	# R -> T2 -> T3 -> T4 -> RS
+	f.decider 'RS', ['signal', '>', 'reset', 'signal', 1], 'RS'
+	f.constant 'S', { signal: 1 }, 'T1'
+	f.constant 'R', { reset: 1 }, 'T2'
+	f.decider 'T1', ['signal', '>', 0, 'signal', 1], 'RS'
+	f.decider 'T2', ['reset', '>', 0, 'reset', 1], 'T3'
+	f.decider 'T3', ['reset', '>', 0, 'reset', 1], ['T41', 'T42']
+	f.decider 'T41', ['reset', '>', 0, 'reset', 1], 'RS'
+	f.decider 'T42', ['reset', '>', 0, 'reset', 1], 'RS'
+	f.tick(1)
+	test.object(f.devices.RS.output).is {}
+	f.tick(1)
+	test.object(f.devices.RS.output).is { signal: 1 }
+	f.tick(1)
+	test.object(f.devices.RS.output).is { signal: 1 }
+	f.tick(1)
+	test.object(f.devices.RS.output).is {}
 	return
