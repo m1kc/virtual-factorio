@@ -20,9 +20,9 @@ constant = (id, data, outs) ->
 	devices[id] = {
 		"type": "constant"
 		"outs": outs
-		
+
 		"cdata": data
-		
+
 		"input": {}
 		"nextInput": {}
 	}
@@ -34,9 +34,23 @@ arith = (id, rules, outs) ->
 	devices[id] = {
 		"type": "arith"
 		"outs": outs
-		
+
 		"rules": rules
-		
+
+		"input": {}
+		"nextInput": {}
+	}
+
+decider = (id, rules, outs) ->
+	checkId(id)
+	rules = rules or []
+	outs = outs or []
+	devices[id] = {
+		"type": "decider"
+		"outs": outs
+
+		"rules": rules
+
 		"input": {}
 		"nextInput": {}
 	}
@@ -70,6 +84,12 @@ constant 'C5'
 
 arith 'counter', ['empty-barrel', '+', 1, 'empty-barrel'], ['counter']
 
+constant 'C6', {barrel: 4}, ['D1', 'D2', 'D3']
+decider 'D1', ['barrel', '<', 5, 'red-light', 1], ['C7']
+decider 'D2', ['barrel', '=', 4, 'red-light', 1], ['C7']
+decider 'D3', ['barrel', '>', 3, 'red-light', 1], ['C7']
+constant 'C7'
+
 # main
 
 TICKS = 3
@@ -101,6 +121,23 @@ for tick in [1..TICKS]
 				when '*' then tmp[0]*tmp[2]
 				when '/' then tmp[0]/tmp[2]
 				else throw new Error "Unknown operation: #{tmp[1]}"
+			for out in device.outs
+				apply(result, out)
+		else if device.type is 'decider'
+			console.log "  Device #{id} is deciding combinator"
+			tmp = device.rules.slice()
+			if typeof tmp[0] is 'string'
+				tmp[0] = device.input[tmp[0]] or 0
+			if typeof tmp[2] is 'string'
+				tmp[2] = device.input[tmp[2]] or 0
+			success = false
+			success = switch tmp[1]
+				when '<' then tmp[0] < tmp[2]
+				when '>' then tmp[0] > tmp[2]
+				when '=' then tmp[0] == tmp[2]
+				else throw new Error "Unknown operation: #{tmp[1]}"
+			result = {}
+			result[tmp[3]] = 1
 			for out in device.outs
 				apply(result, out)
 		else
