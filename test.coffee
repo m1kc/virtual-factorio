@@ -184,7 +184,7 @@ exports['RS trigger'] = ->
 	return
 
 
-exports['Mass arithmetics'] = ->
+exports['mass arithmetics'] = ->
 	f = new Factorio()
 	f.constant 'C1', { a: 1, b: 2, c: 3 }, ['A1', 'A2']
 	f.arith 'A1', ['each', '*', 3, 'each']
@@ -195,14 +195,18 @@ exports['Mass arithmetics'] = ->
 	return
 
 
-exports['"Keep" decider rule'] = ->
+exports['"keep" decider rule'] = ->
 	f = new Factorio()
-	f.constant 'C1', { a: 5, b: 10 }, ['D1', 'D2', 'D3']
+	f.constant 'C1', { a: 5, b: 10 }, ['D1', 'D2', 'D3', 'D4', 'D5']
 	f.decider 'D1', ['b', '>', 8, 'b', 'keep']
 	f.decider 'D2', ['b', '>', 8, 'a', 'keep']
 	f.decider 'D3', ['anything', '>', 0, 'everything', 'keep']
+	f.decider 'D4', ['a', '=', 5, 'everything', 'keep']
+	f.decider 'D5', ['a', '=', 5, 'everything', 1]
 	f.tick()
 	test.object(f.devices.D1.output).is { b: 10 }
 	test.object(f.devices.D2.output).is { a: 10 }
 	test.object(f.devices.D3.output).is { a: 5, b: 10 }
+	test.object(f.devices.D4.output).is { a: 5, b: 10 }
+	test.object(f.devices.D5.output).is { a: 1, b: 1 }
 	return

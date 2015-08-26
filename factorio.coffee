@@ -190,10 +190,18 @@ class Factorio
 							when '=' then tmp[0] == tmp[2]
 							else throw new Error "Unknown operation: #{tmp[1]}"
 						if success
-							if tmp[4] is 'keep'
-								device.output[tmp[3]] = testedCount
+							if tmp[3] is 'everything'
+								if tmp[4] is 'keep'
+									for key, value of device.input
+										device.output[key] = value
+								else
+									for key, value of device.input
+										device.output[key] = 1
 							else
-								device.output[tmp[3]] = 1
+								if tmp[4] is 'keep'
+									device.output[tmp[3]] = testedCount
+								else
+									device.output[tmp[3]] = 1
 				else
 					throw new Error "Unknown type '#{device.type}' of device #{id}"
 
