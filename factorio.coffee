@@ -155,8 +155,10 @@ class Factorio
 						tmp[2] = device.input[tmp[2]] or 0
 					if tmp[0] is 'anything'
 						globalSuccess = false
+						globalTestedCount = null
 						for key, value of device.input
 							localSuccess = false
+							localTestedCount = value
 							localSuccess = switch tmp[1]
 								when '<' then value < tmp[2]
 								when '>' then value > tmp[2]
@@ -164,17 +166,34 @@ class Factorio
 								else throw new Error "Unknown operation: #{tmp[1]}"
 							if localSuccess
 								globalSuccess = true
+								globalTestedCount = localTestedCount
 						if globalSuccess
-							device.output[tmp[3]] = 1
+							if tmp[3] is 'everything'
+								if tmp[4] is 'keep'
+									for key, value of device.input
+										device.output[key] = value
+								else
+									for key, value of device.input
+										device.output[key] = 1
+							else
+								if tmp[4] is 'keep'
+									# Note: in Factorio, this branch is quite random and unreliable.
+									device.output[tmp[3]] = globalTestedCount
+								else
+									device.output[tmp[3]] = 1
 					else
 						success = false
+						testedCount = tmp[0]
 						success = switch tmp[1]
 							when '<' then tmp[0] < tmp[2]
 							when '>' then tmp[0] > tmp[2]
 							when '=' then tmp[0] == tmp[2]
 							else throw new Error "Unknown operation: #{tmp[1]}"
 						if success
-							device.output[tmp[3]] = 1
+							if tmp[4] is 'keep'
+								device.output[tmp[3]] = testedCount
+							else
+								device.output[tmp[3]] = 1
 				else
 					throw new Error "Unknown type '#{device.type}' of device #{id}"
 

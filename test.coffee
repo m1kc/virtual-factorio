@@ -193,3 +193,16 @@ exports['Mass arithmetics'] = ->
 	test.object(f.devices.A1.output).is { a: 3, b: 6, c: 9 }
 	test.object(f.devices.A2.output).is { barrel: 18 }
 	return
+
+
+exports['"Keep" decider rule'] = ->
+	f = new Factorio()
+	f.constant 'C1', { a: 5, b: 10 }, ['D1', 'D2', 'D3']
+	f.decider 'D1', ['b', '>', 8, 'b', 'keep']
+	f.decider 'D2', ['b', '>', 8, 'a', 'keep']
+	f.decider 'D3', ['anything', '>', 0, 'everything', 'keep']
+	f.tick()
+	test.object(f.devices.D1.output).is { b: 10 }
+	test.object(f.devices.D2.output).is { a: 10 }
+	test.object(f.devices.D3.output).is { a: 5, b: 10 }
+	return
