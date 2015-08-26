@@ -1,0 +1,29 @@
+{
+  "name": "virtual-factorio",
+  "version": "1.0.0",
+  "description": "Emulates Factorio combinators.",
+  "main": "factorio.coffee",
+  "dependencies": {
+    "coffee-script": "^1.9.3",
+    "unit.js": "^2.0.0"
+  },
+  "devDependencies": {
+  },
+  "scripts": {
+    "test": "bash test.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/m1kc/virtual-factorio.git"
+  },
+  "keywords": [
+    "factorio",
+    "emulator"
+  ],
+  "author": "m1kc (Max Musatov) <m1kc@yandex.ru>",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/m1kc/virtual-factorio/issues"
+  },
+  "homepage": "https://github.com/m1kc/virtual-factorio#readme"
+}
