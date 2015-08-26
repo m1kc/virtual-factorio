@@ -4,10 +4,11 @@
   "description": "Emulates Factorio combinators.",
   "main": "factorio.coffee",
   "dependencies": {
-    "coffee-script": "^1.9.3",
-    "unit.js": "^2.0.0"
+    "coffee-script": "^1.9.3"
   },
   "devDependencies": {
+    "mocha": "^2.2.5",
+    "unit.js": "^2.0.0"
   },
   "scripts": {
     "test": "bash test.sh"
